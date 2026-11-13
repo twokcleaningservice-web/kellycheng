@@ -1,25 +1,451 @@
 <!DOCTYPE html>
-<html lang="zh"><head>
+<html lang="zh">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="60">
-<title>爆款雷达 · 还在加载</title>
+<title>工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       background:#0a0d13;color:#e8e8ea;text-align:center;padding:24px;
-       font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
-  .spin{width:34px;height:34px;margin:0 auto 26px;border:3px solid #2a2f3a;
-        border-top-color:#ff785a;border-radius:50%;animation:s 1s linear infinite}
-  @keyframes s{to{transform:rotate(360deg)}}
-  h1{font-size:23px;margin:0 0 14px;font-weight:600}
-  p{margin:8px 0;color:#9a9aa2;font-size:15px;line-height:1.75}
-  .hint{margin-top:30px;font-size:13.5px;color:#6e6e78}
-  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
-</style></head><body><div>
-  <div class="spin"></div>
-  <h1>你的页面还在加载中,请稍等</h1>
-  <p>第一次大约需要 20-60 分钟。</p>
-  <p>这一页会自己刷新,你可以先去忙别的。</p>
-  <p class="hint">等很久都没变?回到安装 SOP 第 7 步,<br>到仓库的 Actions 看 Sync Content 有没有跑完。</p>
-</div></body></html>
+  :root {
+    --bg:#0a0d13; --card:#11151d; --card-hi:#151a24; --border:#1d2430; --border-hi:#2c3546;
+    --text:#e8ecf3; --muted:#8a94a6; --faint:#5b6577; --accent:#5ea1ff; --green:#3fd68f;
+    --orange:#f0a33f; --pink:#ff6b9d; --red:#ff5c5c; --fire1:#ff8a3d; --fire2:#ff4d6d;
+    --font:'Inter',-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --disp:'Space Grotesk','Inter','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); -webkit-font-smoothing:antialiased; }
+  ::selection { background:rgba(94,161,255,.3); }
+  ::-webkit-scrollbar { width:10px; } ::-webkit-scrollbar-thumb { background:#232c3b; border-radius:8px; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+  .ic { width:14px; height:14px; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; flex:none; }
+
+  header { position:sticky; top:0; z-index:50; background:rgba(10,13,19,.86);
+    backdrop-filter:blur(14px); border-bottom:1px solid var(--border); padding:13px 20px; }
+  .hrow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; max-width:1200px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:10px; margin-right:auto; }
+  .mark { width:31px; height:31px; border-radius:9px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--fire1),var(--fire2)); box-shadow:0 4px 16px rgba(255,92,80,.35); }
+  .mark .ic { width:17px; height:17px; color:#fff; }
+  h1 { font-family:var(--disp); font-size:16.5px; font-weight:700; line-height:1.15; }
+  h1 small { display:block; color:var(--faint); font-family:var(--font); font-weight:400; font-size:10.5px; }
+  .me { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); cursor:pointer;
+    background:var(--card); border:1px solid var(--border); border-radius:10px; padding:7px 12px;
+    transition:border-color .18s; }
+  .me:hover { border-color:var(--border-hi); }
+  .me b { color:var(--text); }
+
+  nav { display:flex; gap:7px; max-width:1200px; margin:12px auto 0; flex-wrap:wrap; }
+  .ntab { display:inline-flex; align-items:center; gap:7px; background:var(--card);
+    border:1px solid var(--border); border-radius:999px; padding:7px 16px; font-size:13.5px;
+    color:var(--muted); cursor:pointer; user-select:none; transition:all .18s; }
+  .ntab:hover { border-color:var(--border-hi); color:var(--text); }
+  .ntab.on { color:var(--text); background:linear-gradient(135deg,rgba(255,138,61,.15),rgba(255,77,109,.15));
+    border-color:rgba(255,120,90,.45); }
+
+  main { max-width:1200px; margin:22px auto; padding:0 20px; }
+  .page { display:none; } .page.on { display:block; }
+
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .stat { flex:1; min-width:130px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; }
+  .stat .v { font-family:var(--disp); font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .stat .l { color:var(--faint); font-size:12px; margin-top:2px; }
+  .stat.sh .v { color:var(--orange); } .stat.dn .v { color:var(--green); } .stat.pd .v { color:var(--accent); }
+
+  section { background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px 18px; margin-bottom:16px; }
+  section h2 { font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  section h2 .ic { color:var(--orange); }
+  section h2 small { color:var(--faint); font-weight:400; font-size:11.5px; margin-left:auto; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px solid var(--border);
+    font-size:13px; flex-wrap:wrap; }
+  .row .hookline { flex:1; min-width:200px; color:var(--text); overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; }
+  .row .hookline small { color:var(--faint); display:block; font-size:11px; margin-top:1px; }
+  .row .who2 { color:var(--accent); text-decoration:none; font-weight:600; font-size:12px; white-space:nowrap; }
+  .xb { font-family:var(--disp); font-weight:600; font-size:11px; color:var(--orange);
+    border:1px solid rgba(240,163,63,.4); background:rgba(240,163,63,.07); border-radius:99px;
+    padding:2px 8px; white-space:nowrap; }
+  .pill { display:inline-flex; align-items:center; gap:4px; background:#0c0f16; color:var(--muted);
+    border:1px solid var(--border); border-radius:9px; padding:5.5px 10px; font-size:11.5px;
+    cursor:pointer; text-decoration:none; font-family:var(--font); transition:all .18s; white-space:nowrap; }
+  .pill .ic { width:11px; height:11px; }
+  .pill:hover { color:var(--accent); border-color:rgba(94,161,255,.5); }
+  .pill.ok:hover { color:var(--green); border-color:rgba(63,214,143,.5); }
+  .pill.bad:hover { color:var(--red); border-color:rgba(255,92,92,.5); }
+  .none { color:var(--faint); font-size:13px; padding:14px 0 6px; }
+
+  .act { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--border);
+    font-size:12.5px; color:var(--muted); }
+  .act time { color:var(--faint); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .act b { color:var(--text); font-weight:600; }
+  .act .to { color:var(--orange); }
+
+  #radarWrap { height:calc(100vh - 150px); min-height:500px; border:1px solid var(--border);
+    border-radius:16px; overflow:hidden; }
+  #radarWrap iframe { width:100%; height:100%; border:0; }
+
+  .sop { max-width:820px; }
+  .sop h3 { font-size:15px; margin:22px 0 10px; display:flex; gap:8px; align-items:center; }
+  .sop h3 .ic { color:var(--orange); }
+  .sop ol { margin:0 0 8px 22px; color:var(--muted); font-size:13.5px; line-height:1.9; }
+  .sop ol b { color:var(--text); }
+  .sop p { color:var(--muted); font-size:13px; line-height:1.7; margin-bottom:6px; }
+  .sop table { border-collapse:collapse; font-size:13px; margin:8px 0; }
+  .sop td, .sop th { border:1px solid var(--border); padding:7px 14px; color:var(--muted); }
+  .sop th { color:var(--text); background:var(--card-hi); }
+
+  #mission { border:1px solid rgba(255,120,90,.35); border-radius:16px; padding:15px 18px;
+    margin-bottom:14px; background:linear-gradient(135deg,rgba(255,138,61,.10),rgba(255,77,109,.10)); }
+  #mission .mt { font-weight:600; font-size:14px; display:flex; gap:8px; align-items:center; }
+  #mission .mt .ic { color:var(--orange); }
+  #mission .md { color:var(--muted); font-size:12.5px; margin-top:5px; line-height:1.6; }
+  #mission .md b { color:var(--text); font-family:var(--disp); }
+  #overlay { position:fixed; inset:0; background:rgba(6,8,12,.88); backdrop-filter:blur(6px);
+    z-index:200; display:none; place-items:center; }
+  #overlay.show { display:grid; }
+  .obox { background:var(--card); border:1px solid var(--border-hi); border-radius:18px;
+    padding:28px 30px; width:min(92vw,380px); }
+  .obox h2 { font-family:var(--disp); font-size:18px; margin-bottom:6px; }
+  .obox p { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .obox input, .obox select { width:100%; background:#0c0f16; color:var(--text);
+    border:1px solid var(--border); border-radius:10px; padding:10px 13px; font-size:14px;
+    font-family:var(--font); margin-bottom:11px; }
+  .obox input:focus, .obox select:focus { border-color:var(--accent); outline:none; }
+  .obox button { width:100%; background:linear-gradient(135deg,var(--fire1),var(--fire2));
+    color:#fff; border:0; border-radius:10px; padding:11px; font-size:14px; font-weight:600;
+    font-family:var(--font); cursor:pointer; }
+  .obox button:active { transform:scale(.98); }
+
+  #toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(8px);
+    background:var(--card-hi); border:1px solid var(--border-hi); border-radius:11px;
+    padding:11px 20px; font-size:13px; display:none; z-index:300; opacity:0;
+    box-shadow:0 12px 32px rgba(0,0,0,.5); transition:opacity .2s, transform .2s; }
+  #toast.show { display:block; opacity:1; transform:translateX(-50%) translateY(0); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none!important; transition:none!important; } }
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="m10 8 6 4-6 4Z"/><rect x="2" y="4" width="20" height="16" rx="3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-radar" viewBox="0 0 24 24"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+</svg>
+<header>
+  <div class="hrow">
+    <div class="brand">
+      <div class="mark"><svg class="ic"><use href="#i-flame"/></svg></div>
+      <h1>工作台<small id="updated"></small></h1>
+    </div>
+    <div class="me" id="meBtn" title="点击修改身份">
+      <svg class="ic"><use href="#i-user"/></svg><span id="meLabel">未登记</span>
+    </div>
+  </div>
+  <nav>
+    <div class="ntab on" data-p="work"><svg class="ic"><use href="#i-clock"/></svg>今日工作</div>
+    <div class="ntab" data-p="radar"><svg class="ic"><use href="#i-radar"/></svg>爆款雷达</div>
+    <div class="ntab" data-p="sop"><svg class="ic"><use href="#i-book"/></svg>SOP</div>
+  </nav>
+</header>
+<main>
+  <div class="page on" id="p-work">
+    <div id="mission"></div>
+    <div class="stats">
+      <div class="stat pd"><div class="v" id="stPending">–</div><div class="l">未处理(待挑选)</div></div>
+      <div class="stat sh"><div class="v" id="stShoot">–</div><div class="l">拍摄中</div></div>
+      <div class="stat dn"><div class="v" id="stDone">–</div><div class="l">已处理</div></div>
+    </div>
+    <section id="secShoot">
+      <h2><svg class="ic"><use href="#i-video"/></svg>拍摄中队列<small>做完一条,点「完成」</small></h2>
+      <div id="shootList"></div>
+    </section>
+    <section id="secPick">
+      <h2><svg class="ic"><use href="#i-flame"/></svg>本周待挑选爆款 Top 8<small>看中就点「选中拍摄」,细看去爆款雷达</small></h2>
+      <div id="pickList"></div>
+    </section>
+  </div>
+  <div class="page" id="p-radar"><div id="radarWrap"></div></div>
+  <div class="page sop" id="p-sop">
+    <section>
+      <h3><svg class="ic"><use href="#i-flame"/></svg>SOP-01 · Marketer 每周选题流程(周一,约30分钟)</h3>
+      <ol>
+        <li>打开<b>爆款雷达</b>,点快筛「<b>真爆款 ×2+</b>」+「<b>近7天</b>」</li>
+        <li>看「爆款热词」确认本周主题方向(热词越多的主题越优先)</li>
+        <li>挑 <b>3–5 条</b>适合改编的。标准:话题跟我们相关 / Hook 可复制 / 我们拍得出来</li>
+        <li>每条点「<b>Brief</b>」复制 → 发到拍摄群</li>
+        <li>把选中的卡片<b>拖到「拍摄中」</b></li>
+        <li>明显不适合的拖「跳过」,保持未处理越少越好</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-video"/></svg>SOP-02 · Content Creator 拍摄改编流程(每条 ≤1天)</h3>
+      <ol>
+        <li>打开工作台「<b>今日工作</b>」,看拍摄中队列,从最旧的开始</li>
+        <li>打开原帖看 <b>3 遍</b>:第1遍看整体 / 第2遍拆 Hook(前3秒为什么让人停下) / 第3遍记结构(几个镜头、什么节奏)</li>
+        <li><b>改编不照抄</b>:换成我们的案例、口吻、行业。保留结构,替换内容</li>
+        <li>拍摄 → 剪辑。<b>前3秒必须有钩子</b>,字幕开头即出</li>
+        <li>发布后回到工作台,该条点「<b>完成</b>」</li>
+      </ol>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-book"/></svg>SOP-03 · 状态定义(团队统一语言)</h3>
+      <table>
+        <tr><th>状态</th><th>意思</th><th>谁负责改</th></tr>
+        <tr><td>未处理</td><td>还没人筛选过</td><td>Marketer 每周清理</td></tr>
+        <tr><td>拍摄中</td><td>已选中,正在改编/拍摄/剪辑</td><td>Marketer 选中时拖入</td></tr>
+        <tr><td>已处理</td><td>已发布或已完成改编</td><td>Creator 完成时点</td></tr>
+        <tr><td>跳过</td><td>不适合我们,不再考虑</td><td>任何人</td></tr>
+      </table>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-radar"/></svg>SOP-04 · 看到「引流」标签的帖子怎么学</h3>
+      <p>带「引流」标的帖子,重点<b>不是内容,是漏斗</b>。记录三件事:</p>
+      <ol>
+        <li>留言<b>关键词</b>是什么?(例:留言「Start」)</li>
+        <li>送的<b>诱饵</b>是什么?(模板 / 课程 / 清单)</li>
+        <li>之后导去<b>哪里</b>?(DM 自动回复 → 链接 → 报名页)</li>
+      </ol>
+      <p>好的打法直接抄结构,用我们的 GHL / ManyChat 实现。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-05 · 竞对名单管理(发现好账号就加进来)</h3>
+      <ol>
+        <li>打开 Supabase「<b>competitors</b>」表,加一行</li>
+        <li><b>Username</b>:贴账号名或 IG <b>主页</b>链接都行(带 ?igsh= 参数没关系;不要贴帖子链接)</li>
+        <li><b>Tracker</b>:选 IG Competitors 或 AI Competitors</li>
+        <li><b>Active</b>:打勾✅ — <b>没勾不会抓</b></li>
+        <li>每周一自动生效;停止追踪 = 取消勾,不用删行</li>
+      </ol>
+      <p>加账号的标准:跟我们领域相关 / 内容有爆款相 / 值得学。发现雷达里某账号长期没爆款,把它 Active 取消,腾出额度换新的。</p>
+    </section>
+    <section>
+      <h3><svg class="ic"><use href="#i-user"/></svg>SOP-06 · 第一次设置 & 常见问题</h3>
+      <ol>
+        <li><b>登记身份:</b>第一次打开工作台会弹「你是谁」→ 输名字、选角色。这决定你看到的任务卡和排版</li>
+        <li><b>直接改状态:</b>雷达里把卡片拖到上方分类,或用卡片下拉选。看到绿色 ✓ 就成了。<b>不需要输任何密钥</b> —— 这套系统天生只允许改状态,改不了别的数据,所以安全无需登录</li>
+      </ol>
+      <p><b>常见问题:</b></p>
+      <table>
+        <tr><th>现象</th><th>原因</th><th>解决</th></tr>
+        <tr><td>改了状态没反应 / 报错</td><td>网络断了,或页面是旧版</td><td>刷新页面(Ctrl+Shift+R)再试</td></tr>
+        <tr><td>队友改的状态我看不到</td><td>页面最多 10 分钟同步一次</td><td>刷新页面即可;自己的改动是即时的</td></tr>
+        <tr><td>网页打不开 / 数据是空的</td><td>每周自动更新那天可能还在跑</td><td>等 1 小时后再开;还不行找老板看 GitHub Actions</td></tr>
+      </table>
+      <p>状态存在云端(Supabase),换电脑、关机都不会丢,全团队实时共享。</p>
+    </section>
+  </div>
+</main>
+<div id="overlay"><div class="obox">
+  <h2>👋 你是谁?</h2>
+  <p>登记一次,方便团队知道是谁在操作。</p>
+  <input id="oName" placeholder="你的名字" maxlength="20">
+  <select id="oRole">
+    <option value="Marketer">Marketer(选题/投放)</option>
+    <option value="Content Creator">Content Creator(拍摄/剪辑)</option>
+    <option value="Boss">Boss</option>
+  </select>
+  <button id="oSave">进入工作台</button>
+</div></div>
+<div id="toast"></div>
+<script id="data" type="application/json">[{"id": "DetrUKoD3CI", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "“这里不是很脏，那里也不是很脏……” 🤨\n\n装修后的打扫，真的随便抹两下就可以了咩？😂\n\nPost Renovation Cleaning 不是普通的 Home Cleaning！ 🧹\n\n装修留下的灰尘、污渍，还有窗框缝隙里的细节，都需要认真处理。\n\n🏠 新家装修好了？专业的事交给专业团队！\n\n至于全 KL 最贵的清洁公司是谁？Kelvin 自己讲的啦！🤣\n\n📲 立即预约 Ultra Cleaning 装修后清洁服务！\n\n🌐 https://ultracleaning.com.my/\n📲 019-291 1001\n👉 https://wa.me/60192911001\n\n#UltraCleaning #装修后清洁 #PostRenovationCleaning #CleaningServiceMalaysia #新屋清洁 #ProfessionalCleaning #CleaningServiceKL", "transcript": "Hello?呃...你家当中希望你要找终点女佣过去啊啊是啦 几个就够了啦我家不是男生帽的哇嗚真的不是男生帽哦ok啦 这个不是男生帽啊赶紧赶紧咦ok啦这种要自己出现了啦应该是Batman来的我觉得真的是没有男生哦什么不是男生帽你现在就是我们每天都会遇到一些问题每天姑姑给我讲这位不是男生那不是男生但是一个个假起来的话他就是一整天的工作量了必须要再找个刚刚来做总学会的打扫啦不要找就找专业的团队如果你们不知道找谁你可以找我我是奥特克林的甲位虽然我是全甲最贵的但是我们上里去是美贝的", "brk": "Hook类型: 痛点直击与反常识\n结构: 吐槽屋主轻视装修灰尘 → 展示隐藏超大工作量 → 引出专业团队与幽默品牌定位\n为什么火: 用幽默口吻戳中“新房装修后以为很干净”的认知误区，老板自嘲最贵反而加深信任\n改编角度: 拍华人新居入伙前业主自己擦灰翻车的真实画面，对比你们专业清理后的极致细节", "my": "新家装修好以为随便抹两下就能住进去吗。\n你可能觉得，这里一点灰尘，那里一点油漆，自己拿条抹布花个一小时就能搞定。\n其实根本不是这样，那些水泥渍和细小粉尘，自己弄不仅擦不干净，还会弄得到处都是。\n如果你刚好在雪隆区，有三个方法可以帮你把新家收拾干净。\n第一个方法，选择2个人2小时的清洁服务，收费是RM105。\n两个人一起动手，分工合作，短时间内就能把屋子大面积的灰尘清理掉。\n第二个方法，如果家里有楼梯或者是需要更仔细的打扫，可以加上清洁用品，费用是额外RM35。\n用专用的清洁剂去处理那些难搞的污渍，角落和缝隙才会真正干净。\n第三个方法，一定要记得加个吸尘机，费用是加RM10。\n机器吸力强，装修留下的细小颗粒才不会残留。\n以前很多人都是自己买一堆工具，结果搞到腰酸背痛，还弄不干净。\n现在只要把这些交给别人，屋子马上变得整齐舒服。\n麻烦填写以下资料，方便我们安排，把日期、时间、人数、小时和地址发给我们，我们会尽快确认是否有空档安排。", "tags": "UltraCleaning, 装修后清洁, PostRenovationCleaning, CleaningServiceMalaysia, 新屋清洁, ProfessionalCleaning, CleaningServiceKL", "bait": false, "type": "Video", "likes": 108, "comments": 3, "er": 3.11, "followers": 3565, "date": "2026-10-20", "url": "https://www.instagram.com/p/DetrUKoD3CI/", "video": true, "ratio": 0, "score": 3.28, "status": "未处理", "x": 3.0}, {"id": "DdqTL0vgfYs", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "不够钱充值ai, 只好自己来咯🫣", "transcript": "Like an empty fire Like an officer Like an empty fire Stand tall, go higher And I'll, and I'll, and I'll, and I'll say", "brk": "Hook类型: 身份共鸣\n结构: 幽默文案 → 画面展示 → 轻松结尾\n为什么火: 用年轻人梗反向自嘲引发共鸣\n改编角度: 幽默吐槽做家务的痛苦，引出专业清洁服务解放双手", "my": "周末看着满屋子的灰尘，你是不是觉得一定要花大钱找大公司，才能把家彻底打扫干净？\n\n很多人以为，请人来家里打扫，动不动就要几百上千块，或者自己拿着扫帚拖把，从早忙到晚累得腰酸背痛，才能把出租屋或者刚装修好的房子收拾好。\n\n其实真不用这么复杂，也不是只有花大钱才能解决。\n\n只要选对适合的人数和时间，轻轻松松就能搞定。\n\n第一个方法，你可以选择一个人来做三个小时，收费是 RM85。这个时间刚刚好够把客厅和房间仔细打扫一遍，不用自己动手，花点小钱就能换来干净的空间。\n\n第二个方法，如果家里比较大或者赶时间，可以选择两个人来做两个小时，收费是 RM105。两个人一起效率更高，转眼就把油腻的厨房和浴室收拾得清清爽爽。\n\n第三个方法，根据需要灵活加购。如果不想自己准备工具，可以加 RM35 安排清洁用品；如果家里灰尘多需要吸尘，加 RM10 就能用吸尘机，把角角落落吸得干干净净。\n\n以前每次看着乱糟糟的屋子，想动手又觉得太累，想找人又不知道该怎么选。\n\n现在只要发个信息过来，填好日期、时间、人数和地址，我们就会尽快确认空档安排。\n\n如果您也想让家里焕然一新，欢迎随时来问我们，把详细资料发给我们来安排。", "tags": "", "bait": false, "type": "Video", "likes": 49, "comments": 3, "er": 1.46, "followers": 3565, "date": "2026-09-24", "url": "https://www.instagram.com/p/DdqTL0vgfYs/", "video": true, "ratio": 0, "score": 1.63, "status": "未处理", "x": 1.5}, {"id": "DegF74dz0cQ", "tracker": "CLEANING SERVICE 竞对", "competitor": "mossicleaning_kl", "caption": "🏠 装修终于完成了！看着新家一点一点变成自己喜欢的样子，真的很期待搬进去的那一天！🥹🧡\n\n不过，先别急着搬家具入住哦❗ 装修后的灰尘、细尘，还有藏在柜子和角落里的残留，往往不是表面看起来干净，就代表真的清理好了。\n\n🧹 入住前的最后一步，就交给 Mossi Cleaning ！✨\n\n🎥 一起来看看这次装修后清洁的 Before & After⭐ \n\n从原本积着灰尘的角落，到清洁后的整齐清爽，前后的变化一目了然！✨\n\n👉 Mossi Cleaning KL  装修后清洁服务，帮你认真处理每个角落：\n\n✔️ 柜子内外清洁\n✔️ 地板灰尘与污渍清洁\n✔️ 墙边、角落及缝隙清洁\n✔️ 容易忽略的细节清洁\n\n✨ 装修已经够忙了，清洁就交给我们！\n\n让新家从装修后的杂乱，慢慢变成干净、舒服的生活空间，为即将开始的新生活做好准备。🏡🧡\n\n📲 刚装修完，准备入住？现在 WhatsApp 我们询问报价 & 预约！👍🏻 \n\n📞 WhatsApp：019-931 3198\n\n📸 Instagram：@mossicleaning_kl\n📘 Facebook：Mossi Cleaning KL\n📕 小红书：mossicleaning13\n\n🧡 Mossi Cleaning KL｜用心服务每一户", "transcript": "這次我已經忘記了方式了我再一起看Google的價錢49這是我們模式決定的團推還在做淨節當中我們現在要來看我們現在要來看我們模式決定的團推會出現我們小型手衣花的補防盤所以你們不需要擔心我們可以來騙我們來了解我們的總結我們要來看小型型型", "brk": "Hook类型: 痛点直击\n结构: 装修喜悦 → 隐形灰尘痛点 → Before & After对比 → 呼吁下单\n为什么火: 精准切中新房装修后急需入住但清洁无从下手的痛点，前后对比视觉冲击强。\n改编角度: 突出“新家入住前最后一步”，展示专业团队高效率处理装修细尘的治愈过程。", "my": "装修终于搞定了。\n看着新家一点一点变成自己喜欢的样子。\n真的很期待搬进去的那一天。\n不过，先别急着搬家具入住。\n装修后的灰尘、细尘，还有藏在角落里的残留。\n往往不是表面看起来干净，就代表真的清理好了。\n很多人以为，拿一块抹布自己擦一擦。\n或者随便买点清洁剂，就能把灰尘搞定。\n其实根本不是这样。\n装修时留下的细尘到处都是。\n如果自己一点一点去擦，不仅要花好几天时间。\n而且很多缝隙和角落，自己根本清理不到位。\n我们来看看具体怎么处理。\n第一，先看柜子内外。\n装修完的柜子里面，往往积满了木屑和灰尘。\n如果直接把衣服放进去，会弄得很脏。\n我们的清洁人员会仔细擦洗柜子内外。\n把那些细小的灰尘全部清理干净。\n第二，处理地板和角落。\n地板上常常有油漆点和厚厚的灰尘。\n只用扫把根本扫不干净。\n我们会安排人员认真清理地板污渍。\n连墙边、角落和缝隙都不放过。\n第三，根据需要选择加购项目。\n如果你家里需要吸尘机，可以直接加RM10。\n如果需要我们自带清洁用品，可以加RM35。\n这样你完全不用自己准备任何东西。\n以前，屋主总是自己拿着抹布从早擦到晚。\n累得腰酸背痛，灰尘还是擦不干净。\n现在，直接把这些事情交给我们来安排。\n你只需要把时间留给自己去布置新家。\n如果你刚装修完，准备搬进去。\n现在就可以给我们发信息。\n麻烦填写我们的清洁服务预约表。\n告诉我们你的日期、时间和地址。\n收到后，我们会尽快确认是否有空档安排。", "tags": "", "bait": false, "type": "Video", "likes": 11, "comments": 0, "er": 1.21, "followers": 909, "date": "2026-10-15", "url": "https://www.instagram.com/p/DegF74dz0cQ/", "video": true, "ratio": 0, "score": 1.21, "status": "未处理", "x": 1.2}, {"id": "DevgE5uFCN_", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "XX秒就能搭好一组 Scaffolding？！😳\n\n快是快啦，但安全才是最重要的！🤣\n\n做大型建筑清洁（Commercial Building Cleaning），不是随便搭好就可以开工的！\n\n✅ Scaffolding Inspection & Green Tag\n✅ 根据现场高度与环境选择合适设备\n✅ Safety First，才可以安心开工！\n\n我们追求的不只是效率，更是安全与专业。 💪\n\n🏢 需要大型建筑或高空清洁服务？找 Ultra Cleaning！\n\n🌐 https://ultracleaning.com.my/\n📲 019-291 1001\n👉 https://wa.me/60192911001\n\n#UltraCleaning #Scaffolding #BuildingCleaning #CommercialCleaningMalaysia", "transcript": "今天來看一下我們team到底多久沒有搭乘機Skulling1 2 3 Start3 2 3 4 3 2 3大概是4分秒我一set了哇不錯不錯不錯我們來看一下到底是安全沒有啊安全地啊所以我們用的Skulling都是有經過Inspector Nicole就是這個我們叫Green Pack都是每一輪有Inspector Nicole在這邊檢查他們講合格我們才可以使用這個安全的Skulling所以上一次你們所看到的我們那邊的話是Skulling我們也是要根據現場情況來檢查看那個高度周圍的情況我們才決定是要用Skulling還是Skulling還是Szizzle或者是我們講的Spider Lift我們這種大型的建築清潔都我們講出的不是要快我們要的是安全歡迎要找這種大型的清潔可以找我我是Liam from Atal Caning", "brk": "Hook类型: 痛点直击\n结构: 挑战高空架脚手架速度 → 强调安全检查与Green Tag → 引导大型建筑清洁预约\n为什么火: 以“快”为噱头引发好奇，迅速转折到专业安全认证，建立客户信任。\n改编角度: 针对华人商业客户，展示高空清洁严格安全标准与合规流程，打消顾虑。", "my": "雪隆区的出租屋退租了，一打开大门，地上全部都是灰尘。\n\n很多人以为，只要自己拿扫把随便扫一下，就能把屋子弄干净。\n\n其实不是，自己清理根本找不到死角，搬进搬出还是很累。\n\n今天带大家看一下，我们平时去雪隆区做保洁服务，到底是怎样安排的。\n\n第一个，我们会根据您的屋型和需求，安排合适的人数和时间。\n\n比如1个人3小时RM85，或者2个人2小时RM105，都是很常见的选择。\n\n做保洁服务不是随便弄弄就可以，每一个角落都要仔细处理好。\n\n第二个，如果需要用到吸尘机，我们也可以直接加购。\n\n只需要加RM10，就能用吸尘机把地上的灰尘清理得干干净净。\n\n如果屋子比较脏或者有装修后的灰尘，也可以选择加购清洁用品。\n\n清洁用品额外RM35，这样 kakak 上门的时候就能带齐工具直接开工。\n\n第三个，我们的工作时间是从周一到周六，时段有很多选择。\n\n早上有7点半、8点、9点，中午有12点半、1点、1点半。\n\n您可以根据自己方便的时间来预约，不用特地请假在家等。\n\n以前很多人自己打扫一整天，累到腰酸背痛，屋子还是没有彻底干净。\n\n现在找我们安排钟点女佣上门，几小时就能把屋子收拾得整整齐齐。\n\n如果您最近也需要找人帮忙打扫，可以给我们发信息。\n\n麻烦填写一下清洁服务预约表，我们会尽快确认是否有空档安排。", "tags": "UltraCleaning, Scaffolding, BuildingCleaning, CommercialCleaningMalaysia", "bait": false, "type": "Video", "likes": 40, "comments": 0, "er": 1.12, "followers": 3565, "date": "2026-10-21", "url": "https://www.instagram.com/p/DevgE5uFCN_/", "video": true, "ratio": 0, "score": 1.12, "status": "未处理", "x": 1.0}, {"id": "DejRNtHgV1T", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "听说 Ultra Cleaning 是全 KL 最贵的清洁公司？！😱💸\n\nKelvin：最贵我不敢讲，经验我们倒是有！😎\n\n装修后清洁（Post Renovation Cleaning）不是随便吸一吸、抹一抹就搞定的！\n\n🧹 Heavy Duty 专业清洁设备\n🧪 针对 Cement Stain、Paint Stain 使用合适的清洁药水\n✨ Window Frame、Window Track 细节清洁也不马虎！\n\n贵不贵你来评价，专业不专业看我们的成果！ 💪\n\n🏠 刚装修好新家？交给 Ultra Cleaning 帮你搞定！\n\n🌐 https://ultracleaning.com.my/\n📲 019-291 1001\n👉 https://wa.me/60192911001\n\n#UltraCleaning #PostRenovationCleaning #装修后清洁 #新屋清洁 #CleaningServiceKL #CleaningServiceMalaysia #ProfessionalCleaning", "transcript": "每天都有顧客跟我講我家新成績跟你家新成績效果是一樣的來我們的HavidU就可以吸水的喔你都可以嘛欸Karin新成績我們是全KL會不會是你的工作什麼你問全KL了是不是全KL最貴我不知道啦但是最有經驗可以做這樣子的裝修過的打招應該是只有我們吧你不信是你去看看我會這樣講你看下啦好像我們就總的話咧很多種CM stand跟NonePan stand而不是用人手或者是用布插插兩家就可以去除了還有長期留下來那種很久的Stand那種是要用適合的鑰匙去Remove的好像這種WindowFlim的話呢還有這種WindowTrip需要用到專業的藥水跟專業的工具去清洗這個Window的我們也是需要去Remove這種WindowTrip的它裡面吸塵的跟那種濕叉等等之類的之前KL去KL的話我就不知道啦但是最有經驗做這樣子的裝修後清潔應該是我們啦", "brk": "Hook类型: 痛点直击（回应“全KL最贵”的质疑）\n结构: 抛出质疑 → 幽默接梗 → 展示专业细节 → 呼吁行动\n为什么火: 用“最贵”制造争议，老板幽默化解并实景展示硬核专业度。\n改编角度: 拍老板亲自回应“你们服务为什么这么贵”，对比普通清洁突出重围。", "my": "每天都有人问我们雪隆区新屋装修完要怎么清理。\n\n大家以为装修完找人随便擦一擦就可以了。\n\n其实不是，新屋和出租屋装修后有很多很难搞的水泥印和漆迹。\n\n这里跟您分享几个我们做钟点清洁时常用的做法。\n\n第一个是处理地上的水泥印。\n\n我们不是用普通的布去擦，而是看情况用对方法把这些很久的痕迹去除。\n\n这样地面才不会留下白白灰灰的印记。\n\n第二个是清理窗框和窗轨。\n\n很多屋主自己清理的时候，窗缝里的灰尘和漆点很难弄出来。\n\n我们用专门的方法把这些细节部分处理干净，开窗的时候就不会卡灰尘。\n\n第三个是安排合适的人数和时间。\n\n您可以根据屋子的大小，选择1个人3小时RM85，或者2个人2小时RM105。\n\n如果需要吸尘机可以加RM10，需要清洁用品可以加RM35。\n\n这样按时间和人数来做，您可以把时间花在更重要的事情上。\n\n以前很多人自己拿抹布擦到腰酸背痛，地上还是有白印。\n\n现在只要把日期、时间、人数填好，我们就安排人员上门。\n\n麻烦发个信息给我们，我们好帮您确认是否有空档安排。", "tags": "UltraCleaning, PostRenovationCleaning, 装修后清洁, 新屋清洁, CleaningServiceKL, CleaningServiceMalaysia, ProfessionalCleaning", "bait": false, "type": "Video", "likes": 37, "comments": 0, "er": 1.04, "followers": 3565, "date": "2026-10-16", "url": "https://www.instagram.com/p/DejRNtHgV1T/", "video": true, "ratio": 0, "score": 1.04, "status": "未处理", "x": 1.0}, {"id": "DdWBC_YJDLl", "tracker": "CLEANING SERVICE 竞对", "competitor": "mossicleaning_kl", "caption": "🏠✨ 家里干净了，心情真的都会好一点！\n\n工作忙、回到家已经累了，还要打扫真的很辛苦 😮‍💨\n这些小事，就交给 Mossi Cleaning 吧 🧹🧡\n\n👩‍🧹 2位清洁员\n⏰ 2小时清洁服务\n💰 RM130\n🚗 已包括车油 & SST\n\n不管是日常家居清洁、Condo 还是 Office，都欢迎来问问我们 😊\n\n🧹 需要打扫用具 +RM10\n🪜 楼梯 +RM10\n\n📍KL & Selangor\n\n想预约的话，直接 WhatsApp / PM 我们就可以啦 💬\n\n🧡 莫斯清洁打扫 · 用心服务每一天", "transcript": "", "brk": "Hook类型: 痛点直击\n结构: 痛点共鸣 → 解决方案与套餐 → 行动呼吁\n为什么火: 价格透明清晰，精准击中大都市上班族没时间打扫的痛点\n改编角度: 突出极简透明价目表，强调2人2小时高效搞定全屋，吸引懒人直接下单", "my": "下班回到家累得要死，还要面对一堆家务真的快疯掉。\n\n你是不是觉得，找人来帮忙打扫一定很贵，或者还要自己准备一堆工具？\n\n其实完全不用自己烦恼，把这些琐事交给我们来处理。\n\n我们可以根据你的屋型和时间，直接安排人手上门。\n\n如果你想要简单清理一下，2个人2小时只需要RM105，不管是雪隆区的日常家居还是出租屋，都能帮你搞定。\n\n如果你需要用清洁用品，可以额外加RM35，里面还包含4尺楼梯。\n\n如果你家里没有吸尘机，只需要加RM10，我们就会直接带吸尘机过去帮你吸干净。\n\n以前每次放假都要花一整天时间抹地洗厕所，累到腰酸背痛。\n\n现在直接预约我们的服务，时间到了人员就上门，你只需要在旁边休息。\n\n麻烦私信我们 WhatsApp 了解详情，我们会把清洁服务预约表发给你，方便我们安排时间。", "tags": "", "bait": false, "type": "Image", "likes": 3, "comments": 2, "er": 0.55, "followers": 909, "date": "2026-09-16", "url": "https://www.instagram.com/p/DdWBC_YJDLl/", "video": false, "ratio": 0, "score": 0.99, "status": "未处理", "x": 1.0}, {"id": "DeeOk0_DQbw", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "别人 Company Trip 出发前：\n\n“Passport 带了吗？”\n“行李带了吗？”\n\n我们 Ultra Cleaning：\n\n“来，先宣誓。” 😂\n\n这次 Phuket Trip 规则很简单，虽然已经感觉会出事了。\nPhuket，我们来了 🌴✈️\n\n#UltraCleaning #CompanyTrip #PhuketTrip #TeamTrip #OfficeLife #WorkHardPlayHard #CompanyCulture #Phuket #ThailandTrip", "transcript": "", "brk": "Hook类型: 身份共鸣\n结构: 搞笑日常反差 → 团队团建规则 → 开启海外旅行\n为什么火: 用清洁公司独特的职业梗制造反差萌，展现了年轻有趣的团队文化。\n改编角度: 融入清洁工日常幽默，如出发前检查各种清洁剂和抹布，突出团队专业又好玩的氛围。", "my": "每次准备大扫除的时候，\n大家是不是都在想：\n“抹布够不够？”\n“水桶放在哪里？”\n\n其实真不用自己烦恼。\n交给我们安排就行。\n\n第一步，看看需要几个人。\n你可以选1个人3小时RM85，\n或者2个人2小时RM105。\n人数和时间都可以按你家的情况来挑。\n\n第二步，看看要不要加工具。\n如果家里没有吸尘机，\n加VACUMM只要加RM10。\n需要清洁用品的话，额外加RM35。\n这样你完全不用自己准备任何东西。\n\n第三步，直接填表预约。\n把日期、时间和地址写下来，\n发给我们安排。\n工作天是周一到周六，\n早上和中午都有时段可以选。\n\n以前很多人都是自己做到腰酸背痛，\n还要花一整天时间抹地。\n现在直接找我们上门，\n省下时间去做别的事情。\n\n麻烦填写以下资料，方便我们安排。\n收到后，我们会尽快确认是否有空档安排。", "tags": "UltraCleaning, CompanyTrip, PhuketTrip, TeamTrip, OfficeLife, WorkHardPlayHard, CompanyCulture, Phuket, ThailandTrip", "bait": false, "type": "Video", "likes": 23, "comments": 3, "er": 0.73, "followers": 3565, "date": "2026-10-14", "url": "https://www.instagram.com/p/DeeOk0_DQbw/", "video": true, "ratio": 0, "score": 0.9, "status": "未处理", "x": 0.8}, {"id": "DelM5ApgdfN", "tracker": "CLEANING SERVICE 竞对", "competitor": "ultracleaning_hq", "caption": "Just a cleaning company? \n\nMaybe. But we take every little detail seriously.\n\nBecause it's not just about getting the job done. It's about putting care and effort into everything we do. ❤️\n\nSmall details. Big difference. That's Ultra Cleaning. ✨\n\n🏠 Home Cleaning | Office Cleaning | Post-Renovation Cleaning\n\n🌐 https://ultracleaning.com.my/\n📲 019-291 1001\n👉 https://wa.me/60192911001\n\n#UltraCleaning #CleaningServiceMalaysia #ProfessionalCleaning #HomeCleaningMalaysia #BehindTheScenes #CleaningWithCare", "transcript": "That's what I love, mostly quash I never meant to call you in sorrow I never meant to call you in pain Burn up a grave, burn up a grave All we want to see you paining in the burn for me", "brk": "Hook类型: 身份共鸣\n结构: 质疑定位 → 细节特写 → 品牌升华\n为什么火: 用严谨态度打破行业廉价印象建立信任\n改编角度: 放大华人家庭痛点，展示死角清洁的前后巨大反差", "my": "雪隆区的屋子一尘不染，其实每天只要RM105。\n\n很多人以为，租房退租或者装修好之后，一定要自己买一堆工具蹲在地上擦一整天。\n\n其实不用自己动手，把时间留给更重要的事情，只要交给专业的保洁服务。\n\n我们来看三种常见的清洁安排，直接看看怎么选最合适。\n\n第一种是日常维护，1个人3小时只要RM85。\n\n如果家里地方比较大，1个人4小时是RM105。\n\n做完之后地面和桌子都会变得干干净净，平时下班回家就能直接休息。\n\n第二种是快速搞定，2个人1小时是RM75。\n\n或者2个人2小时只要RM105。\n\n两个人一起动手，短时间内就能把客厅和房间全部整理好。\n\n第三种是深度清洁，2个人3小时是RM170。\n\n如果屋子面积更大，2个人4小时是RM210。\n\n连容易忽视的角落都会仔细处理，搬进去住的时候会觉得特别清爽。\n\n如果需要的话，清洁用品额外加RM35，需要吸尘机只要加RM10。\n\n工作天是周一到周六，早上和中午都有不同的时间段可以预约。\n\n以前每次搬家或者装修完，都要自己花好几天慢慢打扫，累得腰酸背痛。\n\n现在直接把清洁交给我们，只要在预约表上填好时间和地址，就能轻松拥有干净的空间。\n\n麻烦私信联系我们，我们会把详细的预约资料发给您，方便我们安排时间。\n\n您好，欢迎再次预约。", "tags": "UltraCleaning, CleaningServiceMalaysia, ProfessionalCleaning, HomeCleaningMalaysia, BehindTheScenes, CleaningWithCare", "bait": false, "type": "Video", "likes": 20, "comments": 0, "er": 0.56, "followers": 3565, "date": "2026-10-17", "url": "https://www.instagram.com/p/DelM5ApgdfN/", "video": true, "ratio": 0, "score": 0.56, "status": "未处理", "x": 0.5}, {"id": "Dda4UqApnhX", "tracker": "CLEANING SERVICE 竞对", "competitor": "mossicleaning_kl", "caption": "新家装修好了？先不要酱快搬进去先 😂🏠\n\n装修后看起来美美了，但其实还有很多装修灰尘、小细节要慢慢清。\n\n而且除了打扫，很多人都会漏掉一个东西 👉 甲醛 🧪\n\n这次 Mossi 团队直接帮顾客安排：\n\n🧹 装修后大清洁\n🧪 甲醛处理\n\n地板、玻璃、柜子、角落全部慢慢处理，过后再用专业机器做甲醛处理 💪\n\n而且不是我们自己讲罢了 😂\n处理前 vs 处理后的检测数据，Video 直接给你看 👀📉\n\n刚装修好新家，不懂要从哪里开始清？\n可以直接找我们 Mossi 🧡\n\n📍 KL • PJ • Selangor\n📲 WhatsApp 019-9313198\n\nMossi Cleaning 莫斯清洁 🧹\n\n#MossiCleaning #装修后清洁 #甲醛处理 #新家装修 #kl清洁", "transcript": "be safe .", "brk": "Hook类型: 痛点直击\n结构: 新房盲目入住隐患 → 深度清洁与除甲醛方案 → 检测数据对比与转化\n为什么火: 直击新房装修后粉尘多和甲醛超标的痛点，用检测数据建立信任\n改编角度: 强调华人新家入住前除甲醛的必要性，展示“清洁+除甲醛”前后数据对比", "my": "新家装修好了，先不要急着搬进去。\n\n很多人以为，装修后看起来美美的就能直接入住了。\n\n其实还有很多装修灰尘和小细节要慢慢清，而且除了打扫，很多人都会漏掉甲醛这个问题。\n\n如果你也遇到装修后的屋子不知道从哪里开始清，我们来帮你安排。\n\n第一步，安排人手做清洁。\n\n你可以根据屋子情况来选择，比如1个人3小时是RM85，1个人4小时是RM105。\n\n如果觉得人手不够，也可以安排2个人来做，2个人2小时是RM105，2个人3小时是RM170。\n\n第二步，选择需要的加购项目。\n\n如果屋子灰尘比较多，需要用到吸尘机，直接加RM10就可以了。\n\n如果自己没有准备清洁用品，也可以选择清洁用品额外RM35。\n\n第三步，直接把资料填好发给我们。\n\n我们这边的工作天是周一到周六，早上有7点半、8点、9点，中午有12点半、1点、1点半的时段可以选。\n\n以前很多人拿到新家钥匙，自己一个人扫地擦玻璃弄到腰酸背痛，还不知道要从哪里下手。\n\n现在只要把日期、时间、人数、小时和地址填在预约表上，我们就来帮你安排。\n\n您好，欢迎来找我们预约。\n\n麻烦直接私信我们，填写清洁服务预约表，方便我们安排时间。", "tags": "MossiCleaning, 装修后清洁, 甲醛处理, 新家装修, kl清洁", "bait": false, "type": "Video", "likes": 4, "comments": 0, "er": 0.44, "followers": 909, "date": "2026-09-18", "url": "https://www.instagram.com/p/Dda4UqApnhX/", "video": true, "ratio": 0, "score": 0.44, "status": "未处理", "x": 0.4}]</script>
+<script>
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const SUPA = 'https://dtgdtbqtvhcjjlbanuul.supabase.co';
+const ANON = 'sb_publishable_weAmdbzzC-ApUJww0I_UdQ_fWgIBib8';
+document.getElementById('updated').textContent = '数据更新于 2026-11-13 11:41 (GMT+8)';
+
+const $ = id => document.getElementById(id);
+const I = n => '<svg class="ic"><use href="#i-' + n + '"/></svg>';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : String(n);
+const getKey = () => ANON;  // anon key is baked in — safe, can only change status
+const firstLine = c => ((c || '').split('\n').map(l => l.trim()).filter(Boolean)[0] || '(无文案)');
+const byRec = {}; DATA.forEach(d => byRec[d.id] = d);
+
+function toast(msg, ok) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  t.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- mission card ----
+function renderMission() {
+  const role = localStorage.getItem('tm_role') || '';
+  const name = localStorage.getItem('tm_name') || '';
+  const pend = DATA.filter(d => d.status === '未处理').length;
+  const hot = DATA.filter(d => d.status === '未处理' && (d.x || 0) >= 2).length;
+  const queue = DATA.filter(d => d.status === '拍摄中').length;
+  const done = DATA.filter(d => d.status === '已处理').length;
+  const m = $('mission');
+  if (role === 'Marketer') {
+    m.innerHTML = '<div class="mt">' + I('flame') + esc(name) + ',任务:从待挑选里选出值得拍的</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条(其中真爆款 ×2+ 有 <b>' + hot + '</b> 条)'
+      + ' · 从下面清单直接选,或去雷达细看</div>';
+  } else if (role === 'Content Creator') {
+    m.innerHTML = '<div class="mt">' + I('video') + esc(name) + ',任务:清空拍摄中队列</div>'
+      + '<div class="md">队列还有 <b>' + queue + '</b> 条待做 · 已完成共 <b>' + done + '</b> 条</div>';
+  } else {
+    m.innerHTML = '<div class="mt">' + I('flame') + '团队概览</div>'
+      + '<div class="md">待挑选 <b>' + pend + '</b> 条 · 拍摄中 <b>' + queue + '</b> 条 · 已完成 <b>' + done + '</b> 条</div>';
+  }
+}
+
+function orderSections() {
+  // Marketer sees picks first; Creator sees shooting queue first
+  if ((localStorage.getItem('tm_role') || '') === 'Marketer') {
+    $('secShoot').parentNode.insertBefore($('secPick'), $('secShoot'));
+  } else {
+    $('secPick').parentNode.insertBefore($('secShoot'), $('secPick'));
+  }
+}
+
+// ---- identity ----
+function meLabel() {
+  const n = localStorage.getItem('tm_name'), r = localStorage.getItem('tm_role');
+  $('meLabel').innerHTML = n ? '<b>' + esc(n) + '</b>&nbsp;· ' + esc(r || '') : '未登记';
+}
+function showOverlay() {
+  $('oName').value = localStorage.getItem('tm_name') || '';
+  $('oRole').value = localStorage.getItem('tm_role') || 'Marketer';
+  $('overlay').classList.add('show');
+}
+$('oSave').onclick = () => {
+  const n = $('oName').value.trim();
+  if (!n) { $('oName').focus(); return; }
+  localStorage.setItem('tm_name', n);
+  localStorage.setItem('tm_role', $('oRole').value);
+  $('overlay').classList.remove('show');
+  meLabel(); orderSections(); renderMission();
+  refreshStatuses();
+};
+$('meBtn').onclick = showOverlay;
+meLabel();
+if (!localStorage.getItem('tm_name')) showOverlay();
+
+// ---- tabs ----
+document.querySelectorAll('.ntab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.ntab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'p-' + t.dataset.p));
+  if (t.dataset.p === 'radar' && !$('radarWrap').querySelector('iframe')) {
+    const f = document.createElement('iframe'); f.src = 'index.html'; $('radarWrap').appendChild(f);
+  }
+});
+
+// ---- status write ----
+async function setStatus(d, val) {
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?post_id=eq.' + encodeURIComponent(d.id), {
+      method: 'PATCH',
+      headers: { 'apikey': ANON, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: val })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d.status = val;
+    cacheStatus(d.id, val);
+    toast('✓ @' + d.competitor + ' → ' + val, true);
+  } catch (e) {
+    toast('失败: ' + e.message, false);
+  }
+  renderWork();
+}
+
+// ---- 今日工作 ----
+function pillBtn(cls, icon, label) {
+  return '<button class="pill ' + cls + '">' + I(icon) + label + '</button>';
+}
+
+function renderWork() {
+  const pend = DATA.filter(d => d.status === '未处理');
+  const shoot = DATA.filter(d => d.status === '拍摄中');
+  const done = DATA.filter(d => d.status === '已处理');
+  $('stPending').textContent = pend.length;
+  $('stShoot').textContent = shoot.length;
+  $('stDone').textContent = done.length;
+
+  // shooting queue
+  const sl = $('shootList'); sl.innerHTML = '';
+  if (!shoot.length) sl.innerHTML = '<div class="none">队列是空的 — Marketer 去爆款雷达挑几条拖进「拍摄中」</div>';
+  shoot.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + ((d.x || 0) >= 2 ? '<span class="xb">×' + d.x + '</span>' : '')
+      + '<span class="hookline">' + esc(firstLine(d.caption)) + '</span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'check', '完成') + pillBtn('bad', 'x', '退回');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '已处理');
+    btns[1].onclick = () => setStatus(d, '未处理');
+    sl.appendChild(r);
+  });
+
+  // picks
+  const picks = pend.filter(d => (d.x || 0) >= 2).sort((a, b) => (b.x || 0) - (a.x || 0)).slice(0, 8);
+  const pl = $('pickList'); pl.innerHTML = '';
+  if (!picks.length) pl.innerHTML = '<div class="none">暂时没有 ×2 以上的未处理爆款 — 等周一自动抓新数据</div>';
+  picks.forEach(d => {
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<span class="xb">×' + d.x + '</span>'
+      + '<a class="who2" href="https://www.instagram.com/' + d.competitor + '/" target="_blank">@' + esc(d.competitor) + '</a>'
+      + '<span class="hookline">' + esc(firstLine(d.caption))
+      + '<small>🔥' + d.score + ' · ER ' + d.er + '% · 💬' + fmt(d.comments) + '</small></span>'
+      + '<a class="pill" href="' + d.url + '" target="_blank">' + I('ext') + '原帖</a>'
+      + pillBtn('ok', 'video', '选中拍摄') + pillBtn('bad', 'x', '跳过');
+    const btns = r.querySelectorAll('button');
+    btns[0].onclick = () => setStatus(d, '拍摄中');
+    btns[1].onclick = () => setStatus(d, '跳过');
+    pl.appendChild(r);
+  });
+  renderMission();
+}
+
+function applyStatusCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    Object.keys(c).forEach(rid => { const d = byRec[rid]; if (d) d.status = c[rid]; });
+  } catch (e) {}
+}
+
+function cacheStatus(rid, val) {
+  try {
+    const c = JSON.parse(localStorage.getItem('st_cache') || '{}');
+    c[rid] = val; localStorage.setItem('st_cache', JSON.stringify(c));
+  } catch (e) {}
+}
+
+// ---- live statuses from Supabase ----
+async function refreshStatuses() {
+  applyStatusCache(); renderWork();  // last-known statuses first
+  if (Date.now() - (+localStorage.getItem('st_ts') || 0) < 600000) return;  // 10-min throttle
+  localStorage.setItem('st_ts', String(Date.now()));
+  const fresh = {};
+  try {
+    const r = await fetch(SUPA + '/rest/v1/posts?select=post_id,status', { headers: { 'apikey': ANON } });
+    if (!r.ok) return;
+    (await r.json()).forEach(row => {
+      const d = byRec[row.post_id];
+      if (d) d.status = row.status || '未处理';
+      if (row.status && row.status !== '未处理') fresh[row.post_id] = row.status;
+    });
+    localStorage.setItem('st_cache', JSON.stringify(fresh));
+    renderWork();
+  } catch (e) {}
+}
+
+orderSections();
+renderMission();
+renderWork();
+refreshStatuses();
+</script>
+</body>
+</html>
